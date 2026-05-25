@@ -203,6 +203,8 @@ body{font-family:'Barlow',sans-serif;background:var(--cinza-bg);color:var(--text
       <div class="form-group"><label>Nº de Eventos</label><input type="number" id="loc-eventos" min="0" placeholder="0"></div>
       <div class="form-group"><label>Locações</label><input type="number" id="loc-locacoes" min="0" placeholder="0"></div>
       <div class="form-group"><label>Valor Total (R$)</label><input type="number" id="loc-valor" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Sala (total do ano)</label><input type="number" id="loc-sala" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Auditório (total do ano)</label><input type="number" id="loc-auditorio" min="0" placeholder="0"></div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
       <button class="btn-save" onclick="salvarLocacao()"><i class="ti ti-check" aria-hidden="true"></i> Salvar</button>
@@ -219,7 +221,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cinza-bg);color:var(--text
   </div>
   <div class="cards-row">
     <div class="card">
-      <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i> Locações por turno</div>
+      <div class="card-title"><i class="ti ti-door" aria-hidden="true"></i> Sala vs Auditório</div>
       <div id="loc-turnos"></div>
     </div>
     <div class="card">
@@ -377,27 +379,36 @@ const SENHA = 'senge2026';
 
 const DEFAULT_DATA = {
   locacoes: {
-    2024: [
-      {mes:'Janeiro',eventos:2,locacoes:2,valor:1050},{mes:'Fevereiro',eventos:3,locacoes:7,valor:3550},
-      {mes:'Março',eventos:3,locacoes:7,valor:2400},{mes:'Abril',eventos:3,locacoes:3,valor:1350},
-      {mes:'Maio',eventos:0,locacoes:0,valor:0},{mes:'Junho',eventos:3,locacoes:21,valor:7350},
-      {mes:'Julho',eventos:4,locacoes:5,valor:2100},{mes:'Agosto',eventos:4,locacoes:5,valor:2700},
-      {mes:'Setembro',eventos:5,locacoes:6,valor:2550},{mes:'Outubro',eventos:5,locacoes:8,valor:4550},
-      {mes:'Novembro',eventos:5,locacoes:8,valor:2650},{mes:'Dezembro',eventos:2,locacoes:2,valor:950}
-    ],
-    2025: [
-      {mes:'Janeiro',eventos:2,locacoes:2,valor:350},{mes:'Fevereiro',eventos:5,locacoes:7,valor:2100},
-      {mes:'Março',eventos:5,locacoes:9,valor:3350},{mes:'Abril',eventos:7,locacoes:9,valor:3450},
-      {mes:'Maio',eventos:10,locacoes:17,valor:6550},{mes:'Junho',eventos:5,locacoes:9,valor:3400},
-      {mes:'Julho',eventos:11,locacoes:16,valor:6870},{mes:'Agosto',eventos:9,locacoes:13,valor:5400},
-      {mes:'Setembro',eventos:6,locacoes:10,valor:3750},{mes:'Outubro',eventos:4,locacoes:11,valor:3100},
-      {mes:'Novembro',eventos:5,locacoes:9,valor:2850},{mes:'Dezembro',eventos:5,locacoes:7,valor:3200}
-    ],
-    2026: [
-      {mes:'Janeiro',eventos:1,locacoes:1,valor:200},{mes:'Fevereiro',eventos:5,locacoes:6,valor:1435},
-      {mes:'Março',eventos:5,locacoes:10,valor:5550},{mes:'Abril',eventos:7,locacoes:10,valor:2700},
-      {mes:'Maio',eventos:7,locacoes:14,valor:4870}
-    ]
+    2024: {
+      meses: [
+        {mes:'Janeiro',eventos:2,locacoes:2,valor:1050},{mes:'Fevereiro',eventos:3,locacoes:7,valor:3550},
+        {mes:'Março',eventos:3,locacoes:7,valor:2400},{mes:'Abril',eventos:3,locacoes:3,valor:1350},
+        {mes:'Maio',eventos:0,locacoes:0,valor:0},{mes:'Junho',eventos:3,locacoes:21,valor:7350},
+        {mes:'Julho',eventos:4,locacoes:5,valor:2100},{mes:'Agosto',eventos:4,locacoes:5,valor:2700},
+        {mes:'Setembro',eventos:5,locacoes:6,valor:2550},{mes:'Outubro',eventos:5,locacoes:8,valor:4550},
+        {mes:'Novembro',eventos:5,locacoes:8,valor:2650},{mes:'Dezembro',eventos:2,locacoes:2,valor:950}
+      ],
+      sala: 61, auditorio: 13
+    },
+    2025: {
+      meses: [
+        {mes:'Janeiro',eventos:2,locacoes:2,valor:350},{mes:'Fevereiro',eventos:5,locacoes:7,valor:2100},
+        {mes:'Março',eventos:5,locacoes:9,valor:3350},{mes:'Abril',eventos:7,locacoes:9,valor:3450},
+        {mes:'Maio',eventos:10,locacoes:17,valor:6550},{mes:'Junho',eventos:5,locacoes:9,valor:3400},
+        {mes:'Julho',eventos:11,locacoes:16,valor:6870},{mes:'Agosto',eventos:9,locacoes:13,valor:5400},
+        {mes:'Setembro',eventos:6,locacoes:10,valor:3750},{mes:'Outubro',eventos:4,locacoes:11,valor:3100},
+        {mes:'Novembro',eventos:5,locacoes:9,valor:2850},{mes:'Dezembro',eventos:5,locacoes:7,valor:3200}
+      ],
+      sala: 94, auditorio: 25
+    },
+    2026: {
+      meses: [
+        {mes:'Janeiro',eventos:1,locacoes:1,valor:200},{mes:'Fevereiro',eventos:5,locacoes:6,valor:1435},
+        {mes:'Março',eventos:5,locacoes:10,valor:5550},{mes:'Abril',eventos:7,locacoes:10,valor:2700},
+        {mes:'Maio',eventos:7,locacoes:14,valor:4870}
+      ],
+      sala: 36, auditorio: 5
+    }
   },
   formaturas: {
     '2025': {
@@ -478,8 +489,21 @@ function loadData() {
     const s = localStorage.getItem(STORE_KEY);
     if (s) {
       const parsed = JSON.parse(s);
-      // garante que estagios é objeto e não array (versão antiga)
+      // migra estagios antigo (array) para objeto
       if (Array.isArray(parsed.estagios)) parsed.estagios = DEFAULT_DATA.estagios;
+      // migra locacoes antigas (array por ano) para {meses, sala, auditorio}
+      if (parsed.locacoes) {
+        Object.keys(parsed.locacoes).forEach(ano => {
+          const v = parsed.locacoes[ano];
+          if (Array.isArray(v)) {
+            parsed.locacoes[ano] = {
+              meses: v,
+              sala: DEFAULT_DATA.locacoes[ano]?.sala || 0,
+              auditorio: DEFAULT_DATA.locacoes[ano]?.auditorio || 0
+            };
+          }
+        });
+      }
       return parsed;
     }
   } catch(e) {}
@@ -561,12 +585,14 @@ function renderLocacoes() {
     yt.appendChild(b);
   });
 
-  const rows = DATA.locacoes[locYear] || [];
+  const anos = DATA.locacoes;
+  const anoData = anos[locYear] || {};
+  const rows = anoData.meses || [];
   const totalVal = rows.reduce((a,r)=>a+r.valor, 0);
   const totalEv  = rows.reduce((a,r)=>a+r.eventos, 0);
   const totalLoc = rows.reduce((a,r)=>a+r.locacoes, 0);
-  const maxVal = Math.max(...rows.map(r=>r.valor), 0);
-  const melhor = rows.find(r=>r.valor===maxVal) || {mes:'—',valor:0};
+  const maxVal   = Math.max(...rows.map(r=>r.valor), 0);
+  const melhor   = rows.find(r=>r.valor===maxVal) || {mes:'—',valor:0};
 
   document.getElementById('loc-kpis').innerHTML = `
     <div class="kpi-card"><div class="kpi-label">Receita total</div><div class="kpi-value">R$${totalVal.toLocaleString('pt-BR')}</div><div class="kpi-delta">${locYear}</div></div>
@@ -587,11 +613,28 @@ function renderLocacoes() {
     }
   });
 
+  const sala = anoData.sala || 0;
+  const aud  = anoData.auditorio || 0;
+  const tot  = sala + aud || 1;
+  const pSala = Math.round(sala/tot*100);
+  const pAud  = Math.round(aud/tot*100);
   document.getElementById('loc-turnos').innerHTML =
-    `<div style="margin-bottom:10px;font-size:12px;color:var(--cinza-text);">Distribuição por turno — dados históricos acumulados</div>` +
-    [['Noite','60%',60],['Tarde','22%',22],['Manhã','11%',11],['Diária','7%',7]].map(([t,p,v])=>
-      `<div class="rank-item"><div class="rank-name" style="min-width:70px;">${t}</div><div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${v}%;">${p}</div></div></div>`
-    ).join('');
+    `<div style="margin-bottom:14px;font-size:12px;color:var(--cinza-text);">Total de locações realizadas em ${locYear}</div>
+     <div class="rank-item">
+       <div class="rank-name" style="min-width:80px;">Sala</div>
+       <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${pSala}%;">${sala}</div></div>
+       <div style="font-size:12px;color:var(--cinza-text);min-width:36px;text-align:right;">${pSala}%</div>
+     </div>
+     <div class="rank-item">
+       <div class="rank-name" style="min-width:80px;">Auditório</div>
+       <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${pAud}%;background:linear-gradient(90deg,var(--amarelo-dark),var(--amarelo));">${aud}</div></div>
+       <div style="font-size:12px;color:var(--cinza-text);min-width:36px;text-align:right;">${pAud}%</div>
+     </div>
+     <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--cinza-border);display:flex;gap:20px;">
+       <div style="font-size:12px;color:var(--cinza-text);">Total: <strong style="color:var(--texto);">${tot}</strong> locações</div>
+       <div style="font-size:12px;color:var(--cinza-text);">Sala: <strong style="color:var(--verde);">${sala}</strong></div>
+       <div style="font-size:12px;color:var(--cinza-text);">Auditório: <strong style="color:var(--amarelo-dark);">${aud}</strong></div>
+     </div>`;
 
   document.getElementById('loc-table').innerHTML =
     `<thead><tr><th>Mês</th><th>Eventos</th><th>Locações</th><th>Receita</th></tr></thead><tbody>${
@@ -605,10 +648,15 @@ function salvarLocacao() {
   const ev  = parseInt(document.getElementById('loc-eventos').value)||0;
   const loc = parseInt(document.getElementById('loc-locacoes').value)||0;
   const val = parseFloat(document.getElementById('loc-valor').value)||0;
-  if (!DATA.locacoes[ano]) DATA.locacoes[ano] = [];
-  const idx = DATA.locacoes[ano].findIndex(r=>r.mes===mes);
+  const sala = parseInt(document.getElementById('loc-sala').value);
+  const aud  = parseInt(document.getElementById('loc-auditorio').value);
+  if (!DATA.locacoes[ano]) DATA.locacoes[ano] = {meses:[], sala:0, auditorio:0};
+  if (!DATA.locacoes[ano].meses) DATA.locacoes[ano].meses = [];
+  if (!isNaN(sala)) DATA.locacoes[ano].sala = sala;
+  if (!isNaN(aud))  DATA.locacoes[ano].auditorio = aud;
+  const idx = DATA.locacoes[ano].meses.findIndex(r=>r.mes===mes);
   const rec = {mes,eventos:ev,locacoes:loc,valor:val};
-  if (idx>=0) DATA.locacoes[ano][idx]=rec; else DATA.locacoes[ano].push(rec);
+  if (idx>=0) DATA.locacoes[ano].meses[idx]=rec; else DATA.locacoes[ano].meses.push(rec);
   saveData(DATA); locYear=ano; renderLocacoes();
   document.getElementById('loc-msg').textContent='✓ Salvo!';
   setTimeout(()=>document.getElementById('loc-msg').textContent='',2500);
