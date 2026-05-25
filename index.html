@@ -167,6 +167,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cinza-bg);color:var(--text
     <button class="nav-btn" onclick="showSection('formaturas',this)"><i class="ti ti-school" aria-hidden="true"></i><span>Formaturas</span></button>
     <button class="nav-btn" onclick="showSection('conexoes',this)"><i class="ti ti-network" aria-hidden="true"></i><span>Conexões Engenharia</span></button>
     <button class="nav-btn" onclick="showSection('estagios',this)"><i class="ti ti-briefcase" aria-hidden="true"></i><span>Estágios</span></button>
+    <button class="nav-btn" onclick="showSection('cursos',this)"><i class="ti ti-certificate" aria-hidden="true"></i><span>Cursos</span></button>
   </div>
 </div>
 
@@ -371,6 +372,54 @@ body{font-family:'Barlow',sans-serif;background:var(--cinza-bg);color:var(--text
   </div>
 </div>
 
+<!-- CURSOS -->
+<div id="sec-cursos" class="section">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Cursos e Capacitações</div>
+      <div class="page-sub">Edições realizadas, inscritos e resultado por ano — 2020 a 2026</div>
+    </div>
+  </div>
+  <div id="edit-cur" class="edit-panel">
+    <div class="edit-panel-title"><i class="ti ti-pencil" aria-hidden="true"></i> Atualizar ano</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Ano</label><input type="text" id="cur-ano" placeholder="Ex: 2026"></div>
+      <div class="form-group"><label>Total de cursos realizados</label><input type="number" id="cur-total" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Total de inscritos</label><input type="number" id="cur-inscritos" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Resultado SENGE (R$)</label><input type="number" id="cur-receita" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Cancelados</label><input type="number" id="cur-cancelados" min="0" placeholder="0"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn-save" onclick="salvarCurso()"><i class="ti ti-check" aria-hidden="true"></i> Salvar</button>
+      <span id="cur-msg" class="save-msg"></span>
+    </div>
+  </div>
+  <div class="year-tabs" id="cur-year-tabs"></div>
+  <div class="kpi-grid" id="cur-kpis"></div>
+  <div class="cards-row single">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Inscritos por ano</div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="curChartInscritos" role="img" aria-label="Inscritos por ano"></canvas></div>
+    </div>
+  </div>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Cursos realizados por área</div>
+      <div class="chart-wrap" style="height:260px;"><canvas id="curChartArea" role="img" aria-label="Cursos por área"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-award" aria-hidden="true"></i> Top 5 cursos por inscritos</div>
+      <div id="cur-top-list"></div>
+    </div>
+  </div>
+  <div class="cards-row single">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-table" aria-hidden="true"></i> Resumo por ano</div>
+      <div style="overflow-x:auto;"><table class="data-table" id="cur-table"></table></div>
+    </div>
+  </div>
+</div>
+
 </div><!-- /main -->
 
 <script>
@@ -460,6 +509,38 @@ const DEFAULT_DATA = {
     {periodo:'Abr/26',    usuarios:758,vagasTotal:38,vagasAtivas:10,prestadores:18},
     {periodo:'Mai/26',    usuarios:781,vagasTotal:41,vagasAtivas:8, prestadores:20}
   ],
+  cursos: {
+    anos: {
+      '2020': { total:20, inscritos:232, receita:49035, cancelados:0,
+        porArea:[{area:'Engenharia Elétrica',qtde:5},{area:'Engenharia Civil',qtde:4},{area:'Geral',qtde:4},{area:'Eng. Química',qtde:3},{area:'Agronomia',qtde:2},{area:'Outros',qtde:2}],
+        top:[{nome:'Licitações',inscritos:20},{nome:'Elaboração de PPCI',inscritos:18},{nome:'Oficina de PPCI',inscritos:18},{nome:'BDI Obras Públicas',inscritos:17},{nome:'Subestações Média Tensão',inscritos:16}]
+      },
+      '2021': { total:32, inscritos:393, receita:65117, cancelados:0,
+        porArea:[{area:'Engenharia Elétrica',qtde:7},{area:'Engenharia Civil',qtde:6},{area:'Geral',qtde:6},{area:'Imóveis/Direito',qtde:5},{area:'Agronomia',qtde:3},{area:'Outros',qtde:5}],
+        top:[{nome:'Energia Eólica',inscritos:24},{nome:'Sistemas Fotovoltaicos',inscritos:18},{nome:'BDI Obras',inscritos:18},{nome:'Avaliação de Imóveis',inscritos:17},{nome:'Incorporação Imobiliária',inscritos:17}]
+      },
+      '2022': { total:27, inscritos:276, receita:44301, cancelados:0,
+        porArea:[{area:'Engenharia Civil',qtde:7},{area:'Engenharia Elétrica',qtde:5},{area:'Geral',qtde:5},{area:'Agronomia',qtde:3},{area:'Eng. Química',qtde:3},{area:'Outros',qtde:4}],
+        top:[{nome:'ODS ONU p/ Engenheiros',inscritos:24},{nome:'Empretec Sebrae',inscritos:24},{nome:'Elaboração de PPCI',inscritos:22},{nome:'Elaboração de PPCI (2ª)',inscritos:15},{nome:'BDI Obras',inscritos:12}]
+      },
+      '2023': { total:20, inscritos:220, receita:74690, cancelados:0,
+        porArea:[{area:'Engenharia Civil',qtde:6},{area:'Engenharia Elétrica',qtde:5},{area:'Geral',qtde:4},{area:'Agronomia',qtde:2},{area:'Eng. Química',qtde:2},{area:'Outros',qtde:1}],
+        top:[{nome:'Proteção Sistemas Distribuição',inscritos:28},{nome:'Perito Judicial',inscritos:24},{nome:'Elaboração de PPCI',inscritos:19},{nome:'Civil 3D Essencial',inscritos:15},{nome:'Gestão de Projetos',inscritos:14}]
+      },
+      '2024': { total:20, inscritos:198, receita:64128, cancelados:4,
+        porArea:[{area:'Engenharia Civil',qtde:7},{area:'Engenharia Elétrica',qtde:5},{area:'Geral',qtde:4},{area:'Agronomia',qtde:2},{area:'Eng. Química',qtde:1},{area:'Outros',qtde:1}],
+        top:[{nome:'Engenheiro Empreendedor',inscritos:26},{nome:'Perito Judicial (5ª ed.)',inscritos:25},{nome:'Elaboração de PPCI',inscritos:21},{nome:'Orçamentação de Obras',inscritos:20},{nome:'Perito Judicial (6ª ed.)',inscritos:14}]
+      },
+      '2025': { total:8, inscritos:43, receita:10004, cancelados:0,
+        porArea:[{area:'Engenharia Civil',qtde:3},{area:'Engenharia Elétrica',qtde:2},{area:'Eng. Química',qtde:2},{area:'Geral',qtde:1}],
+        top:[{nome:'Remoção de N e P',inscritos:9},{nome:'Lodos Ativados',inscritos:8},{nome:'PPCI (29ª ed.)',inscritos:7},{nome:'PPCI (30ª ed.)',inscritos:5},{nome:'PPCI (31ª ed.)',inscritos:5}]
+      },
+      '2026': { total:10, inscritos:32, receita:14368, cancelados:5,
+        porArea:[{area:'Engenharia Elétrica',qtde:3},{area:'Engenharia Civil',qtde:2},{area:'Geral',qtde:2},{area:'Agronomia',qtde:2},{area:'Eng. Química',qtde:1}],
+        top:[{nome:'Marketing Agronegócio',inscritos:10},{nome:'Subestações Média Tensão',inscritos:7},{nome:'PPCI (32ª ed.)',inscritos:6},{nome:'Riscos Psicossociais',inscritos:6},{nome:'Prot. Sistemas Distribuição',inscritos:3}]
+      }
+    }
+  },
   estagios: {
     ativos: {
       total: 20, finalizando: 1,
@@ -515,7 +596,8 @@ let DATA = loadData();
 let locYear = 2026;
 let formPeriodo = '2026-1';
 let currentSection = 'locacoes';
-let locCI=null, formCI=null, cursoCI=null, conCIu=null, conCIn=null, conCIv=null, conCIp=null, estCI=null;
+let locCI=null, formCI=null, cursoCI=null, conCIu=null, conCIn=null, conCIv=null, conCIp=null, estCI=null, curCIi=null, curCIa=null;
+let curAno = '2026';
 
 // Data no header
 const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -568,6 +650,7 @@ function showSection(id, btn) {
   if (id==='formaturas') renderFormaturas();
   if (id==='conexoes')  renderConexoes();
   if (id==='estagios')  renderEstagios();
+  if (id==='cursos')    renderCursos();
 }
 
 // ============================================================
@@ -901,6 +984,76 @@ function salvarEstagio() {
   saveData(DATA); renderEstagios();
   document.getElementById('est-msg').textContent='✓ Salvo!';
   setTimeout(()=>document.getElementById('est-msg').textContent='',2500);
+}
+
+// ============================================================
+// CURSOS
+// ============================================================
+function renderCursos() {
+  const anos = DATA.cursos?.anos || {};
+  const anoKeys = Object.keys(anos).sort();
+  const yt = document.getElementById('cur-year-tabs');
+  yt.innerHTML = '';
+  anoKeys.forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'year-btn' + (a===curAno?' active':'');
+    b.textContent = a;
+    b.onclick = () => { curAno=a; renderCursos(); };
+    yt.appendChild(b);
+  });
+  const d = anos[curAno] || {};
+  document.getElementById('cur-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Cursos realizados</div><div class="kpi-value">${d.total||0}</div><div class="kpi-delta">${curAno}</div></div>
+    <div class="kpi-card kc-m"><div class="kpi-label">Total de inscritos</div><div class="kpi-value">${(d.inscritos||0).toLocaleString('pt-BR')}</div><div class="kpi-delta">${curAno}</div></div>
+    <div class="kpi-card kc-a"><div class="kpi-label">Resultado SENGE</div><div class="kpi-value" style="font-size:20px;">R$${(d.receita||0).toLocaleString('pt-BR')}</div><div class="kpi-delta">${curAno}</div></div>
+    <div class="kpi-card kc-w"><div class="kpi-label">Cancelados</div><div class="kpi-value">${d.cancelados||0}</div><div class="kpi-delta">${curAno}</div></div>`;
+  if (curCIi) curCIi.destroy();
+  const allIns = anoKeys.map(a=>anos[a]?.inscritos||0);
+  curCIi = new Chart(document.getElementById('curChartInscritos').getContext('2d'),{
+    type:'bar', data:{ labels:anoKeys, datasets:[{ label:'Inscritos', data:allIns,
+      backgroundColor:anoKeys.map(a=>a===curAno?'#f5a800':'#1a8a60'), borderRadius:5, borderSkipped:false }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ y:{grid:{color:'#e8ede4'},beginAtZero:true}, x:{grid:{display:false}} } }
+  });
+  if (curCIa) curCIa.destroy();
+  const areas = [...(d.porArea||[])].sort((a,b)=>b.qtde-a.qtde);
+  curCIa = new Chart(document.getElementById('curChartArea').getContext('2d'),{
+    type:'bar', data:{ labels:areas.map(a=>a.area), datasets:[{ label:'Cursos',
+      data:areas.map(a=>a.qtde), backgroundColor:areas.map((_,i)=>i===0?'#f5a800':'#1a8a60'), borderRadius:4 }]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#e8ede4'},ticks:{stepSize:1}},y:{grid:{display:false},ticks:{font:{size:11}}}} }
+  });
+  const top = d.top || [];
+  const maxTop = Math.max(...top.map(t=>t.inscritos),1);
+  document.getElementById('cur-top-list').innerHTML = top.map((t,i)=>
+    `<div class="rank-item">
+      <div style="font-size:11px;font-weight:700;color:${i===0?'var(--amarelo-dark)':'var(--verde)'};min-width:20px;">${i+1}º</div>
+      <div class="rank-name" style="min-width:0;flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.nome}</div>
+      <div class="rank-bar-bg" style="min-width:80px;"><div class="rank-bar-fill" style="width:${Math.round(t.inscritos/maxTop*100)}%;">${t.inscritos}</div></div>
+    </div>`).join('');
+  document.getElementById('cur-table').innerHTML =
+    `<thead><tr><th>Ano</th><th>Cursos</th><th>Inscritos</th><th>Resultado SENGE</th><th>Cancelados</th></tr></thead><tbody>${
+      anoKeys.map(a=>{const r=anos[a]||{};
+        return `<tr style="${a===curAno?'background:#f0f7f4;font-weight:600;':''}">
+          <td>${a}</td><td>${r.total||0}</td><td>${(r.inscritos||0).toLocaleString('pt-BR')}</td>
+          <td>R$${(r.receita||0).toLocaleString('pt-BR')}</td><td>${r.cancelados||0}</td></tr>`;}).join('')
+    }</tbody>`;
+}
+
+function salvarCurso() {
+  const ano=document.getElementById('cur-ano').value.trim();
+  const total=parseInt(document.getElementById('cur-total').value)||0;
+  const inscritos=parseInt(document.getElementById('cur-inscritos').value)||0;
+  const receita=parseFloat(document.getElementById('cur-receita').value)||0;
+  const cancelados=parseInt(document.getElementById('cur-cancelados').value)||0;
+  if(!ano){alert('Informe o ano');return;}
+  if(!DATA.cursos) DATA.cursos={anos:{}};
+  if(!DATA.cursos.anos) DATA.cursos.anos={};
+  if(!DATA.cursos.anos[ano]) DATA.cursos.anos[ano]={porArea:[],top:[]};
+  Object.assign(DATA.cursos.anos[ano],{total,inscritos,receita,cancelados});
+  saveData(DATA); curAno=ano; renderCursos();
+  document.getElementById('cur-msg').textContent='✓ Salvo!';
+  setTimeout(()=>document.getElementById('cur-msg').textContent='',2500);
 }
 
 // ============================================================
