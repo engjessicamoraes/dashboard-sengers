@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENGERS — Painel de Indicadores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --verde:#004d35; --verde-mid:#0a6b49; --verde-light:#1a8a60;
+  --amarelo:#f5a800; --amarelo-dark:#c68600;
+  --cinza-bg:#f4f5f0; --cinza-card:#ffffff; --cinza-border:#dde1d8;
+  --cinza-text:#5a6355; --texto:#1a2218;
+  --radius:10px; --shadow:0 2px 8px rgba(0,77,53,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--cinza-bg);color:var(--texto);min-height:100vh;}
+
+/* HEADER */
+.header{background:var(--verde);position:sticky;top:0;z-index:100;}
+.header-inner{max-width:1300px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;}
+.logo-area{display:flex;align-items:center;gap:0;}
+.logo-gear{display:flex;align-items:center;}
+.logo-gear svg{width:44px;height:44px;flex-shrink:0;}
+.logo-text{margin-left:10px;}
+.logo-senge{color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;letter-spacing:3px;line-height:1;}
+.logo-sub{color:rgba(255,255,255,0.55);font-size:11px;margin-top:1px;}
+.header-right{display:flex;align-items:center;gap:14px;}
+.header-date{color:rgba(255,255,255,0.6);font-size:12px;}
+.gear-btn{background:none;border:none;color:rgba(255,255,255,0.22);cursor:pointer;padding:4px 6px;border-radius:6px;transition:color 0.2s,background 0.2s;font-size:18px;line-height:1;}
+.gear-btn:hover{color:rgba(255,255,255,0.75);background:rgba(255,255,255,0.08);}
+
+/* NAV */
+.nav-bar{background:var(--verde-mid);border-bottom:2px solid var(--amarelo);}
+.nav-inner{max-width:1300px;margin:0 auto;padding:0 24px;display:flex;}
+.nav-btn{background:none;border:none;color:rgba(255,255,255,0.6);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:7px;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;letter-spacing:0.2px;}
+.nav-btn:hover{color:#fff;background:rgba(255,255,255,0.06);}
+.nav-btn.active{color:var(--amarelo);border-bottom-color:var(--amarelo);background:rgba(245,168,0,0.08);}
+.nav-btn i{font-size:16px;}
+
+/* MAIN */
+.main{max-width:1300px;margin:0 auto;padding:28px 24px 60px;}
+.section{display:none;}
+.section.active{display:block;}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--cinza-border);}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--verde);letter-spacing:0.3px;}
+.page-sub{font-size:13px;color:var(--cinza-text);margin-top:3px;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:28px;}
+.kpi-card{background:var(--verde);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.05);}
+.kpi-card.kc-a{background:var(--amarelo);}
+.kpi-card.kc-m{background:var(--verde-light);}
+.kpi-card.kc-w{background:#fff;border:1px solid var(--cinza-border);}
+.kpi-label{font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:8px;}
+.kpi-card.kc-w .kpi-label{color:var(--cinza-text);}
+.kpi-card.kc-a .kpi-label{color:rgba(0,50,30,0.7);}
+.kpi-value{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:700;color:#fff;line-height:1;}
+.kpi-card.kc-w .kpi-value{color:var(--verde);}
+.kpi-card.kc-a .kpi-value{color:var(--verde);}
+.kpi-delta{font-size:12px;color:rgba(255,255,255,0.6);margin-top:5px;}
+.kpi-card.kc-w .kpi-delta{color:var(--cinza-text);}
+.kpi-card.kc-a .kpi-delta{color:rgba(0,50,30,0.6);}
+
+/* CARDS */
+.cards-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;}
+.cards-row.single{grid-template-columns:1fr;}
+.card{background:var(--cinza-card);border:1px solid var(--cinza-border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+.card-title{font-size:13px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:16px;display:flex;align-items:center;gap:7px;}
+.card-title i{font-size:16px;color:var(--amarelo-dark);}
+.chart-wrap{position:relative;width:100%;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+.data-table th{background:var(--verde);color:#fff;padding:9px 12px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;}
+.data-table th:first-child{border-radius:6px 0 0 0;}
+.data-table th:last-child{border-radius:0 6px 0 0;}
+.data-table td{padding:9px 12px;border-bottom:1px solid var(--cinza-border);color:var(--texto);}
+.data-table tr:nth-child(even) td{background:#f8faf7;}
+.data-table tr:last-child td{border-bottom:none;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-v{background:#e1f0e8;color:var(--verde);}
+.badge-a{background:#fef3d0;color:var(--amarelo-dark);}
+
+/* EDIT PANEL */
+.edit-panel{background:#fff8e6;border:1.5px solid var(--amarelo);border-radius:var(--radius);padding:22px;margin-bottom:24px;display:none;}
+.edit-panel.open{display:block;}
+.edit-panel-title{font-size:14px;font-weight:600;color:var(--verde);margin-bottom:16px;display:flex;align-items:center;gap:7px;}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:11px;font-weight:600;color:var(--cinza-text);text-transform:uppercase;letter-spacing:0.5px;}
+.form-group input,.form-group select{border:1px solid var(--cinza-border);border-radius:6px;padding:8px 10px;font-family:'Barlow',sans-serif;font-size:13px;color:var(--texto);background:#fff;outline:none;transition:border-color 0.15s;}
+.form-group input:focus,.form-group select:focus{border-color:var(--verde-mid);box-shadow:0 0 0 3px rgba(10,107,73,0.1);}
+.btn-save{background:var(--verde);color:#fff;border:none;border-radius:7px;padding:9px 20px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.btn-save:hover{background:var(--verde-mid);}
+.save-msg{font-size:12px;color:var(--verde-light);margin-left:10px;font-weight:500;}
+
+/* YEAR TABS */
+.year-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.year-btn{background:#fff;border:1px solid var(--cinza-border);border-radius:6px;padding:6px 16px;font-family:'Barlow',sans-serif;font-size:13px;color:var(--cinza-text);cursor:pointer;font-weight:500;transition:all 0.15s;}
+.year-btn.active{background:var(--verde);color:#fff;border-color:var(--verde);}
+
+/* RANK BAR */
+.rank-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.rank-name{font-size:12px;color:var(--texto);min-width:90px;}
+.rank-bar-bg{flex:1;height:18px;background:var(--cinza-border);border-radius:4px;overflow:hidden;}
+.rank-bar-fill{height:100%;background:linear-gradient(90deg,var(--verde) 0%,var(--verde-light) 100%);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:11px;font-weight:600;color:#fff;min-width:24px;transition:width 0.5s ease;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#fff;border-radius:12px;padding:32px 28px;width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.18);}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--verde);margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--cinza-text);margin-bottom:20px;}
+.modal-input{width:100%;border:1px solid var(--cinza-border);border-radius:7px;padding:10px 12px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;margin-bottom:12px;}
+.modal-input:focus{border-color:var(--verde-mid);box-shadow:0 0 0 3px rgba(10,107,73,0.1);}
+.modal-err{font-size:12px;color:#c0392b;margin-bottom:10px;min-height:16px;}
+.modal-btns{display:flex;gap:10px;}
+.modal-btn-ok{flex:1;background:var(--verde);color:#fff;border:none;border-radius:7px;padding:10px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.modal-btn-ok:hover{background:var(--verde-mid);}
+.modal-btn-cancel{background:#fff;color:var(--cinza-text);border:1px solid var(--cinza-border);border-radius:7px;padding:10px 14px;font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;}
+
+@media(max-width:700px){
+  .main{padding:16px;}
+  .kpi-grid{grid-template-columns:1fr 1fr;}
+  .cards-row{grid-template-columns:1fr;}
+  .nav-btn span{display:none;}
+  .nav-btn{padding:12px 14px;}
+  .logo-sub{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-area">
+      <div class="logo-gear">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M24 16a8 8 0 1 0 0 16 8 8 0 0 0 0-16z" fill="#f5a800"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M20.5 4h7l1.2 5a13 13 0 0 1 3.8 2.2l4.9-1.8 3.5 6-3.8 3.4c.2 1 .2 2 0 3l3.8 3.4-3.5 6-4.9-1.8A13 13 0 0 1 28.7 39l-1.2 5h-7l-1.2-5a13 13 0 0 1-3.8-2.2L10.6 38.6l-3.5-6 3.8-3.4a13 13 0 0 1 0-3L7.1 22.8l3.5-6 4.9 1.8A13 13 0 0 1 19.3 16l1.2-6zm3.5 11a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" fill="#f5a800"/>
+        </svg>
+        <div class="logo-text">
+          <div class="logo-senge">SENGERS</div>
+          <div class="logo-sub">Sindicato dos Engenheiros no Rio Grande do Sul</div>
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-date" id="hdr-date"></div>
+      <button class="gear-btn" id="gear-btn" aria-label="Administração">
+        <i class="ti ti-settings" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showSection('locacoes',this)"><i class="ti ti-building-community" aria-hidden="true"></i><span>Locações</span></button>
+    <button class="nav-btn" onclick="showSection('formaturas',this)"><i class="ti ti-school" aria-hidden="true"></i><span>Formaturas</span></button>
+    <button class="nav-btn" onclick="showSection('conexoes',this)"><i class="ti ti-network" aria-hidden="true"></i><span>Conexões Engenharia</span></button>
+    <button class="nav-btn" onclick="showSection('estagios',this)"><i class="ti ti-briefcase" aria-hidden="true"></i><span>Estágios</span></button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-senha">
+  <div class="modal-box">
+    <div class="modal-title"><i class="ti ti-lock" aria-hidden="true"></i> Área restrita</div>
+    <div class="modal-sub">Digite a senha para acessar o painel de atualização de dados.</div>
+    <input class="modal-input" type="password" id="modal-pwd" placeholder="Senha" onkeydown="if(event.key==='Enter')confirmarSenha()">
+    <div class="modal-err" id="modal-err"></div>
+    <div class="modal-btns">
+      <button class="modal-btn-ok" onclick="confirmarSenha()">Entrar</button>
+      <button class="modal-btn-cancel" onclick="fecharModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- LOCAÇÕES -->
+<div id="sec-locacoes" class="section active">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Locações do Auditório e das Salas</div>
+      <div class="page-sub">Acompanhamento mensal de eventos, locações e receita</div>
+    </div>
+  </div>
+  <div id="edit-loc" class="edit-panel">
+    <div class="edit-panel-title"><i class="ti ti-pencil" aria-hidden="true"></i> Registrar mês</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Ano</label>
+        <select id="loc-ano"><option>2024</option><option>2025</option><option selected>2026</option></select></div>
+      <div class="form-group"><label>Mês</label>
+        <select id="loc-mes"><option>Janeiro</option><option>Fevereiro</option><option>Março</option><option>Abril</option><option>Maio</option><option>Junho</option><option>Julho</option><option>Agosto</option><option>Setembro</option><option>Outubro</option><option>Novembro</option><option>Dezembro</option></select></div>
+      <div class="form-group"><label>Nº de Eventos</label><input type="number" id="loc-eventos" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Locações</label><input type="number" id="loc-locacoes" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Valor Total (R$)</label><input type="number" id="loc-valor" min="0" placeholder="0"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn-save" onclick="salvarLocacao()"><i class="ti ti-check" aria-hidden="true"></i> Salvar</button>
+      <span id="loc-msg" class="save-msg"></span>
+    </div>
+  </div>
+  <div class="year-tabs" id="loc-year-tabs"></div>
+  <div class="kpi-grid" id="loc-kpis"></div>
+  <div class="cards-row single">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Receita mensal (R$)</div>
+      <div class="chart-wrap" style="height:240px;"><canvas id="locChart" role="img" aria-label="Receita mensal de locações"></canvas></div>
+    </div>
+  </div>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i> Locações por turno</div>
+      <div id="loc-turnos"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-table" aria-hidden="true"></i> Histórico mensal</div>
+      <div style="overflow-x:auto;"><table class="data-table" id="loc-table"></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- FORMATURAS -->
+<div id="sec-formaturas" class="section">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Participações em Formaturas</div>
+      <div class="page-sub">Homenageados, formaturas por universidade e por curso</div>
+    </div>
+  </div>
+  <div id="edit-form" class="edit-panel">
+    <div class="edit-panel-title"><i class="ti ti-pencil" aria-hidden="true"></i> Adicionar registro</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Período</label>
+        <select id="form-periodo"><option>2025</option><option>2026-1</option></select></div>
+      <div class="form-group"><label>Universidade</label><input type="text" id="form-uni" placeholder="Ex: UFRGS"></div>
+      <div class="form-group"><label>Formaturas com representante</label><input type="number" id="form-form" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Homenageados</label><input type="number" id="form-hom" min="0" placeholder="0"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn-save" onclick="salvarFormatura()"><i class="ti ti-check" aria-hidden="true"></i> Salvar</button>
+      <span id="form-msg" class="save-msg"></span>
+    </div>
+  </div>
+  <div class="year-tabs" id="form-year-tabs"></div>
+  <div class="kpi-grid" id="form-kpis"></div>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Formaturas por universidade</div>
+      <div class="chart-wrap" style="height:280px;"><canvas id="formChart" role="img" aria-label="Formaturas por universidade"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-award" aria-hidden="true"></i> Homenageados por universidade</div>
+      <div id="form-hom-list" style="max-height:280px;overflow-y:auto;"></div>
+    </div>
+  </div>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-books" aria-hidden="true"></i> Formaturas por curso</div>
+      <div class="chart-wrap" style="height:320px;"><canvas id="cursoChart" role="img" aria-label="Formaturas por curso"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-users" aria-hidden="true"></i> Representantes ativos</div>
+      <div style="overflow-x:auto;"><table class="data-table" id="repr-table"></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONEXÕES -->
+<div id="sec-conexoes" class="section">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Conexões Engenharia</div>
+      <div class="page-sub">Usuários, vagas ativas, prestadores de serviço e crescimento mensal</div>
+    </div>
+  </div>
+  <div id="edit-con" class="edit-panel">
+    <div class="edit-panel-title"><i class="ti ti-pencil" aria-hidden="true"></i> Atualizar indicador</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Período</label><input type="text" id="con-periodo" placeholder="Ex: Jun/2026"></div>
+      <div class="form-group"><label>Total de usuários</label><input type="number" id="con-usuarios" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Vagas cadastradas (total)</label><input type="number" id="con-vagas-total" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Vagas ativas</label><input type="number" id="con-vagas-ativas" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Prestadores ativos (deixe vazio se não souber)</label><input type="number" id="con-prestadores" min="0" placeholder="—"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn-save" onclick="salvarConexoes()"><i class="ti ti-check" aria-hidden="true"></i> Salvar</button>
+      <span id="con-msg" class="save-msg"></span>
+    </div>
+  </div>
+  <div class="kpi-grid" id="con-kpis"></div>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-users" aria-hidden="true"></i> Usuários totais</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="conChartUsuarios" role="img" aria-label="Evolução de usuários totais"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-user-plus" aria-hidden="true"></i> Novos usuários por mês</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="conChartNovos" role="img" aria-label="Novos usuários por mês"></canvas></div>
+    </div>
+  </div>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-briefcase" aria-hidden="true"></i> Vagas cadastradas e ativas</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="conChartVagas" role="img" aria-label="Vagas cadastradas e ativas"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-tool" aria-hidden="true"></i> Prestadores de serviço ativos</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="conChartPrestadores" role="img" aria-label="Prestadores de serviço ativos"></canvas></div>
+    </div>
+  </div>
+  <div class="cards-row single">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-table" aria-hidden="true"></i> Histórico detalhado</div>
+      <div style="overflow-x:auto;"><table class="data-table" id="con-table"></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ESTÁGIOS -->
+<div id="sec-estagios" class="section">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Estágios</div>
+      <div class="page-sub">Contratos ativos e histórico de acompanhamento</div>
+    </div>
+  </div>
+  <div id="edit-est" class="edit-panel">
+    <div class="edit-panel-title"><i class="ti ti-pencil" aria-hidden="true"></i> Atualizar dados</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Ano de referência</label><input type="text" id="est-ano" placeholder="Ex: 2026"></div>
+      <div class="form-group"><label>Total de contratos ativos</label><input type="number" id="est-contratos" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Finalizando em breve</label><input type="number" id="est-finalizando" min="0" placeholder="0"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn-save" onclick="salvarEstagio()"><i class="ti ti-check" aria-hidden="true"></i> Salvar</button>
+      <span id="est-msg" class="save-msg"></span>
+    </div>
+  </div>
+  <div class="kpi-grid" id="est-kpis"></div>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Contratos por ano</div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="estChart" role="img" aria-label="Contratos de estágio por ano"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-books" aria-hidden="true"></i> Ativos por curso</div>
+      <div style="overflow-x:auto;"><table class="data-table" id="est-table"></table></div>
+    </div>
+  </div>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-school" aria-hidden="true"></i> Ativos por universidade</div>
+      <div id="est-uni-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-building" aria-hidden="true"></i> Ativos por empresa contratante</div>
+      <div id="est-emp-list"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+const STORE_KEY = 'sengers_dash_v4';
+const SENHA = 'senge2026';
+
+const DEFAULT_DATA = {
+  locacoes: {
+    2024: [
+      {mes:'Janeiro',eventos:2,locacoes:2,valor:1050},{mes:'Fevereiro',eventos:3,locacoes:7,valor:3550},
+      {mes:'Março',eventos:3,locacoes:7,valor:2400},{mes:'Abril',eventos:3,locacoes:3,valor:1350},
+      {mes:'Maio',eventos:0,locacoes:0,valor:0},{mes:'Junho',eventos:3,locacoes:21,valor:7350},
+      {mes:'Julho',eventos:4,locacoes:5,valor:2100},{mes:'Agosto',eventos:4,locacoes:5,valor:2700},
+      {mes:'Setembro',eventos:5,locacoes:6,valor:2550},{mes:'Outubro',eventos:5,locacoes:8,valor:4550},
+      {mes:'Novembro',eventos:5,locacoes:8,valor:2650},{mes:'Dezembro',eventos:2,locacoes:2,valor:950}
+    ],
+    2025: [
+      {mes:'Janeiro',eventos:2,locacoes:2,valor:350},{mes:'Fevereiro',eventos:5,locacoes:7,valor:2100},
+      {mes:'Março',eventos:5,locacoes:9,valor:3350},{mes:'Abril',eventos:7,locacoes:9,valor:3450},
+      {mes:'Maio',eventos:10,locacoes:17,valor:6550},{mes:'Junho',eventos:5,locacoes:9,valor:3400},
+      {mes:'Julho',eventos:11,locacoes:16,valor:6870},{mes:'Agosto',eventos:9,locacoes:13,valor:5400},
+      {mes:'Setembro',eventos:6,locacoes:10,valor:3750},{mes:'Outubro',eventos:4,locacoes:11,valor:3100},
+      {mes:'Novembro',eventos:5,locacoes:9,valor:2850},{mes:'Dezembro',eventos:5,locacoes:7,valor:3200}
+    ],
+    2026: [
+      {mes:'Janeiro',eventos:1,locacoes:1,valor:200},{mes:'Fevereiro',eventos:5,locacoes:6,valor:1435},
+      {mes:'Março',eventos:5,locacoes:10,valor:5550},{mes:'Abril',eventos:7,locacoes:10,valor:2700},
+      {mes:'Maio',eventos:7,locacoes:14,valor:4870}
+    ]
+  },
+  formaturas: {
+    '2025': {
+      universidades: [
+        {uni:'PUC',formaturas:1,homenageados:7},{uni:'URI',formaturas:1,homenageados:1},
+        {uni:'UNIJUI',formaturas:3,homenageados:5},{uni:'UCS',formaturas:4,homenageados:10},
+        {uni:'UFSM',formaturas:4,homenageados:20},{uni:'ULBRA',formaturas:4,homenageados:16},
+        {uni:'UNISINOS',formaturas:8,homenageados:15},{uni:'UFRGS',formaturas:16,homenageados:25}
+      ],
+      cursos: [
+        {curso:'Eng. Civil',qtde:14},{curso:'Eng. Mecânica',qtde:13},{curso:'Eng. Produção',qtde:12},
+        {curso:'Eng. Elétrica',qtde:11},{curso:'Eng. Química',qtde:9},{curso:'Eng. Computação',qtde:7},
+        {curso:'Eng. C. Automação',qtde:7},{curso:'Agronomia',qtde:6},{curso:'Eng. Amb. Sanitária',qtde:3},{curso:'Outros',qtde:8}
+      ],
+      representantes: [
+        {nome:'Monir Silva Saldanha',formaturas:7},{nome:'Nanci Begnini Giugno',formaturas:3},
+        {nome:'Dulphe Pinheiro Machado',formaturas:2},{nome:'Irineu Pedro Foschiera',formaturas:2},
+        {nome:'Jéssica Bandeira Moraes',formaturas:2},{nome:'Katiule Pereira Moraes',formaturas:2},
+        {nome:'Moema Felske Leuck',formaturas:2},{nome:'Paulo R. da S. Samuel',formaturas:2}
+      ]
+    },
+    '2026-1': {
+      universidades: [
+        {uni:'IFRS',formaturas:1,homenageados:2},{uni:'ULBRA',formaturas:1,homenageados:6},
+        {uni:'PUCRS',formaturas:1,homenageados:7},{uni:'Feevale',formaturas:2,homenageados:4},
+        {uni:'UFSM',formaturas:2,homenageados:10},{uni:'URI',formaturas:3,homenageados:4},
+        {uni:'UNIJUI',formaturas:4,homenageados:9},{uni:'Unisinos',formaturas:5,homenageados:11},
+        {uni:'UCS',formaturas:7,homenageados:8},{uni:'UFRGS',formaturas:8,homenageados:14}
+      ],
+      cursos: [
+        {curso:'Eng. Mecânica',qtde:13},{curso:'Eng. Civil',qtde:12},{curso:'Eng. Produção',qtde:12},
+        {curso:'Eng. Elétrica',qtde:12},{curso:'Agronomia',qtde:10},{curso:'Eng. Química',qtde:10},
+        {curso:'Eng. Computação',qtde:6},{curso:'Eng. C. Automação',qtde:6},{curso:'Eng. Ambiental',qtde:4},{curso:'Outros',qtde:16}
+      ],
+      representantes: [
+        {nome:'Monir Silva Saldanha',formaturas:5},{nome:'Pedro Ivan de Oliveira',formaturas:3},
+        {nome:'Nilton C. Dutra de Souza',formaturas:3},{nome:'Jéssica Bandeira Moraes',formaturas:2},
+        {nome:'Fernanda Santos Pescador',formaturas:2},{nome:'Irineu Pedro Foschiera',formaturas:2},
+        {nome:'Nanci Begnini Giugno',formaturas:2},{nome:'Carlos Olavo Neutzling',formaturas:1}
+      ]
+    }
+  },
+  conexoes: [
+    {periodo:'Até Nov/25',usuarios:436,vagasTotal:21,vagasAtivas:15,prestadores:null},
+    {periodo:'Dez/25',    usuarios:484,vagasTotal:21,vagasAtivas:15,prestadores:null},
+    {periodo:'Jan/26',    usuarios:551,vagasTotal:25,vagasAtivas:14,prestadores:null},
+    {periodo:'Fev/26',    usuarios:667,vagasTotal:29,vagasAtivas:10,prestadores:null},
+    {periodo:'Mar/26',    usuarios:711,vagasTotal:35,vagasAtivas:17,prestadores:12},
+    {periodo:'Abr/26',    usuarios:758,vagasTotal:38,vagasAtivas:10,prestadores:18},
+    {periodo:'Mai/26',    usuarios:781,vagasTotal:41,vagasAtivas:8, prestadores:20}
+  ],
+  estagios: {
+    ativos: {
+      total: 20, finalizando: 1,
+      porCurso: [
+        {curso:'Eng. Civil',qtde:16},{curso:'Arq. e Urbanismo',qtde:3},{curso:'Eng. Química',qtde:1}
+      ],
+      porUniversidade: [
+        {uni:'UFRGS',qtde:14},{uni:'UNIRITTER',qtde:3},{uni:'PUCRS',qtde:3}
+      ],
+      porEmpresa: [
+        {empresa:'Morana Encorp',qtde:6},{empresa:'Azambuja',qtde:4},{empresa:'Sim Projetos',qtde:4},
+        {empresa:'BSG',qtde:2},{empresa:'Simon',qtde:2},{empresa:'Isocell',qtde:1},{empresa:'Vanguarda',qtde:1}
+      ]
+    },
+    historico: [
+      {ano:'2023',contratos:21},{ano:'2024',contratos:36},{ano:'2025',contratos:35},{ano:'2026',contratos:20}
+    ],
+    encerrados: {total:94, efetivados:6}
+  }
+};
+
+// ============================================================
+// DADOS — sempre parte do DEFAULT se o localStorage não tiver
+// ============================================================
+function loadData() {
+  try {
+    const s = localStorage.getItem(STORE_KEY);
+    if (s) {
+      const parsed = JSON.parse(s);
+      // garante que estagios é objeto e não array (versão antiga)
+      if (Array.isArray(parsed.estagios)) parsed.estagios = DEFAULT_DATA.estagios;
+      return parsed;
+    }
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+function saveData(d) { try { localStorage.setItem(STORE_KEY, JSON.stringify(d)); } catch(e) {} }
+
+let DATA = loadData();
+let locYear = 2026;
+let formPeriodo = '2026-1';
+let currentSection = 'locacoes';
+let locCI=null, formCI=null, cursoCI=null, conCIu=null, conCIn=null, conCIv=null, conCIp=null, estCI=null;
+
+// Data no header
+const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+document.getElementById('hdr-date').textContent = (()=>{const d=new Date();return `${d.getDate()} de ${months[d.getMonth()]} de ${d.getFullYear()}`;})();
+
+// ============================================================
+// MODAL SENHA
+// ============================================================
+let pendingMod = null;
+
+document.getElementById('gear-btn').addEventListener('click', () => {
+  const mod = currentSection==='locacoes'?'loc':currentSection==='formaturas'?'form':currentSection==='conexoes'?'con':'est';
+  abrirModal(mod);
+});
+
+function abrirModal(mod) {
+  pendingMod = mod;
+  document.getElementById('modal-pwd').value = '';
+  document.getElementById('modal-err').textContent = '';
+  document.getElementById('modal-senha').classList.add('open');
+  setTimeout(() => document.getElementById('modal-pwd').focus(), 80);
+}
+function fecharModal() {
+  document.getElementById('modal-senha').classList.remove('open');
+  pendingMod = null;
+}
+function confirmarSenha() {
+  const pwd = document.getElementById('modal-pwd').value;
+  if (pwd === SENHA) {
+    fecharModal();
+    const p = document.getElementById('edit-' + pendingMod);
+    if (p) p.classList.toggle('open');
+  } else {
+    document.getElementById('modal-err').textContent = 'Senha incorreta. Tente novamente.';
+    document.getElementById('modal-pwd').value = '';
+    document.getElementById('modal-pwd').focus();
+  }
+}
+
+// ============================================================
+// NAV
+// ============================================================
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  btn.classList.add('active');
+  currentSection = id;
+  if (id==='locacoes')  renderLocacoes();
+  if (id==='formaturas') renderFormaturas();
+  if (id==='conexoes')  renderConexoes();
+  if (id==='estagios')  renderEstagios();
+}
+
+// ============================================================
+// LOCAÇÕES
+// ============================================================
+function renderLocacoes() {
+  const years = Object.keys(DATA.locacoes).map(Number).sort();
+  const yt = document.getElementById('loc-year-tabs');
+  yt.innerHTML = '';
+  years.forEach(y => {
+    const b = document.createElement('button');
+    b.className = 'year-btn' + (y===locYear?' active':'');
+    b.textContent = y;
+    b.onclick = () => { locYear=y; renderLocacoes(); };
+    yt.appendChild(b);
+  });
+
+  const rows = DATA.locacoes[locYear] || [];
+  const totalVal = rows.reduce((a,r)=>a+r.valor, 0);
+  const totalEv  = rows.reduce((a,r)=>a+r.eventos, 0);
+  const totalLoc = rows.reduce((a,r)=>a+r.locacoes, 0);
+  const maxVal = Math.max(...rows.map(r=>r.valor), 0);
+  const melhor = rows.find(r=>r.valor===maxVal) || {mes:'—',valor:0};
+
+  document.getElementById('loc-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Receita total</div><div class="kpi-value">R$${totalVal.toLocaleString('pt-BR')}</div><div class="kpi-delta">${locYear}</div></div>
+    <div class="kpi-card kc-m"><div class="kpi-label">Eventos realizados</div><div class="kpi-value">${totalEv}</div><div class="kpi-delta">${locYear}</div></div>
+    <div class="kpi-card kc-a"><div class="kpi-label">Locações totais</div><div class="kpi-value">${totalLoc}</div><div class="kpi-delta">${locYear}</div></div>
+    <div class="kpi-card kc-w"><div class="kpi-label">Melhor mês</div><div class="kpi-value" style="font-size:22px;">${melhor.mes}</div><div class="kpi-delta">R$${melhor.valor.toLocaleString('pt-BR')}</div></div>`;
+
+  if (locCI) locCI.destroy();
+  locCI = new Chart(document.getElementById('locChart').getContext('2d'), {
+    type:'bar',
+    data:{ labels:rows.map(r=>r.mes.substring(0,3)), datasets:[{
+      label:'Receita (R$)', data:rows.map(r=>r.valor),
+      backgroundColor: rows.map(r=>r.valor===maxVal?'#f5a800':'#1a8a60'),
+      borderRadius:5, borderSkipped:false
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ y:{grid:{color:'#e8ede4'},ticks:{callback:v=>'R$'+v.toLocaleString('pt-BR')}}, x:{grid:{display:false}} }
+    }
+  });
+
+  document.getElementById('loc-turnos').innerHTML =
+    `<div style="margin-bottom:10px;font-size:12px;color:var(--cinza-text);">Distribuição por turno — dados históricos acumulados</div>` +
+    [['Noite','60%',60],['Tarde','22%',22],['Manhã','11%',11],['Diária','7%',7]].map(([t,p,v])=>
+      `<div class="rank-item"><div class="rank-name" style="min-width:70px;">${t}</div><div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${v}%;">${p}</div></div></div>`
+    ).join('');
+
+  document.getElementById('loc-table').innerHTML =
+    `<thead><tr><th>Mês</th><th>Eventos</th><th>Locações</th><th>Receita</th></tr></thead><tbody>${
+      rows.map(r=>`<tr><td>${r.mes}</td><td>${r.eventos}</td><td>${r.locacoes}</td><td>R$${r.valor.toLocaleString('pt-BR')}</td></tr>`).join('')
+    }</tbody>`;
+}
+
+function salvarLocacao() {
+  const ano = parseInt(document.getElementById('loc-ano').value);
+  const mes = document.getElementById('loc-mes').value;
+  const ev  = parseInt(document.getElementById('loc-eventos').value)||0;
+  const loc = parseInt(document.getElementById('loc-locacoes').value)||0;
+  const val = parseFloat(document.getElementById('loc-valor').value)||0;
+  if (!DATA.locacoes[ano]) DATA.locacoes[ano] = [];
+  const idx = DATA.locacoes[ano].findIndex(r=>r.mes===mes);
+  const rec = {mes,eventos:ev,locacoes:loc,valor:val};
+  if (idx>=0) DATA.locacoes[ano][idx]=rec; else DATA.locacoes[ano].push(rec);
+  saveData(DATA); locYear=ano; renderLocacoes();
+  document.getElementById('loc-msg').textContent='✓ Salvo!';
+  setTimeout(()=>document.getElementById('loc-msg').textContent='',2500);
+}
+
+// ============================================================
+// FORMATURAS
+// ============================================================
+function renderFormaturas() {
+  const periodos = Object.keys(DATA.formaturas);
+  const yt = document.getElementById('form-year-tabs');
+  yt.innerHTML = '';
+  periodos.forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'year-btn'+(p===formPeriodo?' active':'');
+    b.textContent = p;
+    b.onclick = ()=>{ formPeriodo=p; renderFormaturas(); };
+    yt.appendChild(b);
+  });
+
+  const fd = DATA.formaturas[formPeriodo];
+  if (!fd) return;
+  const totalForm = fd.universidades.reduce((a,u)=>a+u.formaturas, 0);
+  const totalHom  = fd.universidades.reduce((a,u)=>a+u.homenageados, 0);
+  const maxF = Math.max(...fd.universidades.map(u=>u.formaturas), 0);
+  const topUni = fd.universidades.find(u=>u.formaturas===maxF) || {uni:'—',formaturas:0};
+
+  document.getElementById('form-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Formaturas com representante</div><div class="kpi-value">${totalForm}</div><div class="kpi-delta">${formPeriodo}</div></div>
+    <div class="kpi-card kc-m"><div class="kpi-label">Homenageados</div><div class="kpi-value">${totalHom}</div><div class="kpi-delta">${formPeriodo}</div></div>
+    <div class="kpi-card kc-a"><div class="kpi-label">Universidades</div><div class="kpi-value">${fd.universidades.length}</div><div class="kpi-delta">${formPeriodo}</div></div>
+    <div class="kpi-card kc-w"><div class="kpi-label">Top universidade</div><div class="kpi-value" style="font-size:22px;">${topUni.uni}</div><div class="kpi-delta">${topUni.formaturas} formaturas</div></div>`;
+
+  if (formCI) formCI.destroy();
+  const unis = [...fd.universidades].sort((a,b)=>a.formaturas-b.formaturas);
+  formCI = new Chart(document.getElementById('formChart').getContext('2d'), {
+    type:'bar', data:{ labels:unis.map(u=>u.uni), datasets:[{label:'Formaturas',data:unis.map(u=>u.formaturas),backgroundColor:'#004d35',borderRadius:4}] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#e8ede4'},ticks:{stepSize:1}},y:{grid:{display:false},ticks:{font:{size:11}}}} }
+  });
+
+  const sortedH = [...fd.universidades].sort((a,b)=>b.homenageados-a.homenageados);
+  const maxH = sortedH[0]?.homenageados||1;
+  document.getElementById('form-hom-list').innerHTML = sortedH.map(u=>
+    `<div class="rank-item"><div class="rank-name">${u.uni}</div><div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${Math.round(u.homenageados/maxH*100)}%;">${u.homenageados}</div></div></div>`
+  ).join('');
+
+  if (cursoCI) cursoCI.destroy();
+  const cursos = [...fd.cursos].sort((a,b)=>b.qtde-a.qtde);
+  cursoCI = new Chart(document.getElementById('cursoChart').getContext('2d'), {
+    type:'bar', data:{ labels:cursos.map(c=>c.curso), datasets:[{label:'Qtde',data:cursos.map(c=>c.qtde),backgroundColor:cursos.map((c,i)=>i===0?'#f5a800':'#1a8a60'),borderRadius:4}] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#e8ede4'}},y:{grid:{display:false},ticks:{font:{size:11}}}} }
+  });
+
+  document.getElementById('repr-table').innerHTML =
+    `<thead><tr><th>#</th><th>Representante</th><th>Formaturas</th></tr></thead><tbody>${
+      fd.representantes.map((r,i)=>`<tr><td><span class="badge ${i===0?'badge-a':'badge-v'}">${i+1}º</span></td><td>${r.nome}</td><td><strong>${r.formaturas}</strong></td></tr>`).join('')
+    }</tbody>`;
+}
+
+function salvarFormatura() {
+  const p   = document.getElementById('form-periodo').value;
+  const uni = document.getElementById('form-uni').value.trim();
+  const form= parseInt(document.getElementById('form-form').value)||0;
+  const hom = parseInt(document.getElementById('form-hom').value)||0;
+  if (!uni) { alert('Informe a universidade'); return; }
+  if (!DATA.formaturas[p]) DATA.formaturas[p]={universidades:[],cursos:[],representantes:[]};
+  const idx = DATA.formaturas[p].universidades.findIndex(u=>u.uni.toLowerCase()===uni.toLowerCase());
+  const rec = {uni,formaturas:form,homenageados:hom};
+  if (idx>=0) DATA.formaturas[p].universidades[idx]=rec; else DATA.formaturas[p].universidades.push(rec);
+  saveData(DATA); formPeriodo=p; renderFormaturas();
+  document.getElementById('form-msg').textContent='✓ Salvo!';
+  setTimeout(()=>document.getElementById('form-msg').textContent='',2500);
+}
+
+// ============================================================
+// CONEXÕES
+// ============================================================
+function renderConexoes() {
+  const rows = DATA.conexoes || [];
+  const last = rows[rows.length-1] || {};
+  const prev = rows[rows.length-2] || {};
+  const novosU = (last.usuarios && prev.usuarios) ? last.usuarios-prev.usuarios : 0;
+  const novosP = (last.prestadores != null && prev.prestadores != null) ? last.prestadores-prev.prestadores : 0;
+
+  document.getElementById('con-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Total de usuários</div><div class="kpi-value">${(last.usuarios||0).toLocaleString('pt-BR')}</div><div class="kpi-delta">${novosU>0?`+${novosU} este mês`:last.periodo||'—'}</div></div>
+    <div class="kpi-card kc-m"><div class="kpi-label">Vagas cadastradas</div><div class="kpi-value">${last.vagasTotal||0}</div><div class="kpi-delta">${last.vagasAtivas||0} ativas agora</div></div>
+    <div class="kpi-card kc-a"><div class="kpi-label">Prestadores ativos</div><div class="kpi-value">${last.prestadores!=null?last.prestadores:'—'}</div><div class="kpi-delta">${novosP>0?`+${novosP} este mês`:last.periodo||'—'}</div></div>
+    <div class="kpi-card kc-w"><div class="kpi-label">Última atualização</div><div class="kpi-value" style="font-size:20px;">${last.periodo||'—'}</div><div class="kpi-delta">${rows.length} períodos</div></div>`;
+
+  const labels = rows.map(r=>r.periodo);
+  const lineOpts = cor => ({
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{ y:{grid:{color:'#e8ede4'},ticks:{color:cor}}, x:{grid:{display:false},ticks:{font:{size:10}}} }
+  });
+
+  // 1 — usuários totais
+  if (conCIu) conCIu.destroy();
+  conCIu = new Chart(document.getElementById('conChartUsuarios').getContext('2d'), {
+    type:'line', data:{ labels, datasets:[{
+      label:'Usuários', data:rows.map(r=>r.usuarios||0),
+      borderColor:'#004d35', backgroundColor:'rgba(0,77,53,0.1)', tension:0.3, fill:true, pointBackgroundColor:'#004d35', pointRadius:5
+    }]}, options: lineOpts('#004d35')
+  });
+
+  // 2 — novos usuários por mês
+  const novos = rows.map((r,i)=> i===0 ? 0 : (r.usuarios||0)-(rows[i-1].usuarios||0));
+  const maxNovos = Math.max(...novos, 0);
+  if (conCIn) conCIn.destroy();
+  conCIn = new Chart(document.getElementById('conChartNovos').getContext('2d'), {
+    type:'bar', data:{ labels, datasets:[{
+      label:'Novos', data:novos,
+      backgroundColor:novos.map(v=>v===maxNovos&&v>0?'#f5a800':'#1a8a60'),
+      borderRadius:5, borderSkipped:false
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ y:{grid:{color:'#e8ede4'},ticks:{stepSize:20}}, x:{grid:{display:false},ticks:{font:{size:10}}} }
+    }
+  });
+
+  // 3 — vagas cadastradas vs ativas
+  if (conCIv) conCIv.destroy();
+  conCIv = new Chart(document.getElementById('conChartVagas').getContext('2d'), {
+    type:'bar', data:{ labels, datasets:[
+      {label:'Cadastradas', data:rows.map(r=>r.vagasTotal||0), backgroundColor:'#004d35', borderRadius:4},
+      {label:'Ativas',      data:rows.map(r=>r.vagasAtivas||0), backgroundColor:'#f5a800', borderRadius:4}
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{usePointStyle:true,pointStyleWidth:8,boxHeight:8,font:{size:11}}}},
+      scales:{ y:{grid:{color:'#e8ede4'},ticks:{stepSize:5}}, x:{grid:{display:false},ticks:{font:{size:10}}} }
+    }
+  });
+
+  // 4 — prestadores (só onde há dado)
+  const rowsP = rows.filter(r=>r.prestadores!=null);
+  if (conCIp) conCIp.destroy();
+  if (rowsP.length > 0) {
+    conCIp = new Chart(document.getElementById('conChartPrestadores').getContext('2d'), {
+      type:'line', data:{ labels:rowsP.map(r=>r.periodo), datasets:[{
+        label:'Prestadores', data:rowsP.map(r=>r.prestadores),
+        borderColor:'#1a8a60', backgroundColor:'rgba(26,138,96,0.1)', tension:0.3, fill:true, pointBackgroundColor:'#1a8a60', pointRadius:5
+      }]}, options: lineOpts('#1a8a60')
+    });
+  } else {
+    const ctx = document.getElementById('conChartPrestadores').getContext('2d');
+    ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    ctx.font='13px Barlow,sans-serif'; ctx.fillStyle='#a0a89a'; ctx.textAlign='center';
+    ctx.fillText('Sem dados registrados',ctx.canvas.width/2,ctx.canvas.height/2);
+  }
+
+  document.getElementById('con-table').innerHTML =
+    `<thead><tr><th>Período</th><th>Usuários</th><th>Vagas (total)</th><th>Vagas ativas</th><th>Prestadores</th></tr></thead><tbody>${
+      rows.map(r=>`<tr><td>${r.periodo}</td><td>${(r.usuarios||0).toLocaleString('pt-BR')}</td><td>${r.vagasTotal||0}</td><td>${r.vagasAtivas||0}</td><td>${r.prestadores!=null?r.prestadores:'—'}</td></tr>`).join('')
+    }</tbody>`;
+}
+
+function salvarConexoes() {
+  const periodo    = document.getElementById('con-periodo').value.trim();
+  const usuarios   = parseInt(document.getElementById('con-usuarios').value)||0;
+  const vagasTotal = parseInt(document.getElementById('con-vagas-total').value)||0;
+  const vagasAtivas= parseInt(document.getElementById('con-vagas-ativas').value)||0;
+  const pRaw       = document.getElementById('con-prestadores').value.trim();
+  const prestadores= pRaw===''?null:parseInt(pRaw)||0;
+  if (!periodo) { alert('Informe o período'); return; }
+  if (!DATA.conexoes) DATA.conexoes = [];
+  const idx = DATA.conexoes.findIndex(r=>r.periodo===periodo);
+  const rec = {periodo,usuarios,vagasTotal,vagasAtivas,prestadores};
+  if (idx>=0) DATA.conexoes[idx]=rec; else DATA.conexoes.push(rec);
+  saveData(DATA); renderConexoes();
+  document.getElementById('con-msg').textContent='✓ Salvo!';
+  setTimeout(()=>document.getElementById('con-msg').textContent='',2500);
+}
+
+// ============================================================
+// ESTÁGIOS
+// ============================================================
+function renderEstagios() {
+  const est = DATA.estagios || {};
+  const at  = est.ativos   || {};
+  const hist= est.historico|| [];
+  const enc = est.encerrados|| {};
+
+  document.getElementById('est-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Contratos ativos</div><div class="kpi-value">${at.total||0}</div><div class="kpi-delta">Mai/2026</div></div>
+    <div class="kpi-card kc-m"><div class="kpi-label">Finalizando em breve</div><div class="kpi-value">${at.finalizando||0}</div><div class="kpi-delta">vencimento próximo</div></div>
+    <div class="kpi-card kc-a"><div class="kpi-label">Contratos encerrados</div><div class="kpi-value">${enc.total||0}</div><div class="kpi-delta">histórico total</div></div>
+    <div class="kpi-card kc-w"><div class="kpi-label">Efetivados</div><div class="kpi-value">${enc.efetivados||0}</div><div class="kpi-delta">ao longo do tempo</div></div>`;
+
+  if (estCI) estCI.destroy();
+  estCI = new Chart(document.getElementById('estChart').getContext('2d'), {
+    type:'bar',
+    data:{ labels:hist.map(h=>h.ano), datasets:[{
+      label:'Contratos iniciados', data:hist.map(h=>h.contratos),
+      backgroundColor:hist.map((h,i)=>i===hist.length-1?'#f5a800':'#1a8a60'),
+      borderRadius:6, borderSkipped:false
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ y:{grid:{color:'#e8ede4'},beginAtZero:true}, x:{grid:{display:false}} }
+    }
+  });
+
+  const porCurso = at.porCurso || [];
+  const maxC = Math.max(...porCurso.map(c=>c.qtde), 1);
+  document.getElementById('est-table').innerHTML =
+    `<thead><tr><th>Curso</th><th>Ativos</th><th></th></tr></thead><tbody>${
+      porCurso.map(c=>`<tr>
+        <td>${c.curso}</td><td><strong>${c.qtde}</strong></td>
+        <td style="width:100px;"><div style="height:8px;background:var(--cinza-border);border-radius:4px;overflow:hidden;">
+          <div style="height:100%;width:${Math.round(c.qtde/maxC*100)}%;background:var(--verde-light);border-radius:4px;"></div></div></td>
+      </tr>`).join('')
+    }</tbody>`;
+
+  const porUni = at.porUniversidade || [];
+  const maxU = Math.max(...porUni.map(u=>u.qtde), 1);
+  document.getElementById('est-uni-list').innerHTML = porUni.map(u=>
+    `<div class="rank-item"><div class="rank-name">${u.uni}</div><div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${Math.round(u.qtde/maxU*100)}%;">${u.qtde}</div></div></div>`
+  ).join('');
+
+  const porEmp = at.porEmpresa || [];
+  const maxE = Math.max(...porEmp.map(e=>e.qtde), 1);
+  document.getElementById('est-emp-list').innerHTML = porEmp.map(e=>
+    `<div class="rank-item"><div class="rank-name" style="min-width:110px;font-size:11px;">${e.empresa}</div><div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${Math.round(e.qtde/maxE*100)}%;">${e.qtde}</div></div></div>`
+  ).join('');
+}
+
+function salvarEstagio() {
+  const ano        = document.getElementById('est-ano').value.trim();
+  const contratos  = parseInt(document.getElementById('est-contratos').value)||0;
+  const finalizando= parseInt(document.getElementById('est-finalizando').value)||0;
+  if (!ano) { alert('Informe o ano'); return; }
+  if (!DATA.estagios.historico) DATA.estagios.historico = [];
+  const idx = DATA.estagios.historico.findIndex(r=>r.ano===ano);
+  if (idx>=0) DATA.estagios.historico[idx].contratos=contratos;
+  else DATA.estagios.historico.push({ano,contratos});
+  if (DATA.estagios.ativos) {
+    DATA.estagios.ativos.total = contratos;
+    DATA.estagios.ativos.finalizando = finalizando;
+  }
+  saveData(DATA); renderEstagios();
+  document.getElementById('est-msg').textContent='✓ Salvo!';
+  setTimeout(()=>document.getElementById('est-msg').textContent='',2500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderLocacoes();
+</script>
+</body>
+</html>
